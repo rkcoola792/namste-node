@@ -3,13 +3,18 @@ const app = express();
 const port = 3000;
 const db = require("./config/database");
 const User = require("./models/user");
+const checkEmailExists = require("./middleware/duplicateEmail");
 app.use(express.json());
 
-app.post("/signup", async (req, res) => {
+app.post("/signup", checkEmailExists, async (req, res) => {
   console.log(req.body);
-  const newUser = new User(req.body);
-  await newUser.save().then(() => console.log("User saved"));
-  res.status(201).send("User signed up");
+  try {
+    const newUser = new User(req.body);
+    await newUser.save();
+    res.status(201).send("User signed up");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get("/users", async (req, res) => {
@@ -36,6 +41,14 @@ app.delete("/users/:id", async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
     console.log("deletedUser", deletedUser);
+    res.status(200).send("Deleted User");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+app.delete("/users", async (req, res) => {
+  try {
+    const deletedUser = await User.deleteMany({ email: req.body.email });
     res.status(200).send("Deleted User");
   } catch (error) {
     res.status(500).json({ error: error.message });
