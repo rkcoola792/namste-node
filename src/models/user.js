@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const user = new mongoose.Schema(
   {
     name: {
@@ -18,6 +17,12 @@ const user = new mongoose.Schema(
       lowercase: true,
       trim: true,
       unique: true,
+      validate: {
+        validator: function (v) {
+          return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v);
+        },
+        message: "Please enter a valid email",
+      },
     },
     gender: {
       type: String,
@@ -30,6 +35,10 @@ const user = new mongoose.Schema(
     },
     skills: {
       type: [String],
+    },
+    password: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true }
