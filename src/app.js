@@ -1,6 +1,6 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
-const saltRounds = 10;
+const { createHash, compareHash } = require("./utils/createHash");
+const validator = require("validator");
 const app = express();
 const port = 3000;
 const db = require("./config/database");
@@ -12,8 +12,7 @@ app.use(express.json());
 app.post("/signup", checkEmailExists, async (req, res) => {
   const { name, email, password, age, gender } = req.body;
   const strongPassword = await isStrongPassword(req.body.password);
-  const salt = bcrypt.genSaltSync(saltRounds);
-  const encryptedPassword = bcrypt.hashSync(req.body.password, salt);
+  const hash = createHash(password);
   try {
     if (!strongPassword) {
       throw new Error("Password is not strong enough");
@@ -21,7 +20,7 @@ app.post("/signup", checkEmailExists, async (req, res) => {
     const newUser = new User({
       name,
       email,
-      password: encryptedPassword,
+      password: hash,
       age,
       gender,
     });
@@ -29,6 +28,27 @@ app.post("/signup", checkEmailExists, async (req, res) => {
     res.status(201).send("User signed up");
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const isValidEmail = validator.isEmail(email);
+    if (!isValidEmail) {
+      throw new Error("Invalid email");
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+    const isValidPassword = compareHash(password, user.password);
+    if (!isValidPassword) {
+      throw new Error("Invalid credentials");
+    }
+    res.status(200).send("Login successful");
+  } catch (error) {
+    res.status(500).send({ error: error.message });
   }
 });
 
@@ -53,16 +73,13 @@ app.patch(
     const updatedUser = await User.findByIdAndUpdate(id, req.body, {
       new: true,
     });
-    console.log("updatedUser", updatedUser);
     res.status(201).send("Updated User", updatedUser);
   }
 );
 
 app.delete("/users/:id", async (req, res) => {
-  console.log("req", req.params.id);
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
-    console.log("deletedUser", deletedUser);
     res.status(200).send("Deleted User");
   } catch (error) {
     res.status(500).json({ error: error.message });
