@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { compareHash, createHash } = require("../utils/createHash");
+const jwt = require("jsonwebtoken");
 const user = new mongoose.Schema(
   {
     name: {
@@ -43,5 +45,19 @@ const user = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+user.methods.getJWT = async function () {
+  const user = this; //this will give the current logged in user object
+  const token = await jwt.sign({ id: this._id }, "Rajeev@12345", {
+    expiresIn: "1d",
+  });
+  return token;
+};
+
+user.methods.validatePassword = async function (passwordEntered) {
+  const user = this;
+  const isValidPassword = await compareHash(passwordEntered, user.password);
+  return isValidPassword;
+};
 
 module.exports = mongoose.model("User", user);

@@ -7,6 +7,9 @@ const db = require("./config/database");
 const User = require("./models/user");
 const checkEmailExists = require("./middleware/duplicateEmail");
 const { isStrongPassword } = require("./utils/strongPassword");
+const cookieParser = require("cookie-parser");
+const userAuth = require("./middleware/auth");
+app.use(cookieParser());
 app.use(express.json());
 
 app.post("/signup", checkEmailExists, async (req, res) => {
@@ -42,13 +45,30 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid credentials");
     }
-    const isValidPassword = compareHash(password, user.password);
+    const isValidPassword = await user.validatePassword(password);
     if (!isValidPassword) {
       throw new Error("Invalid credentials");
     }
+    const token = await user.getJWT();
+    res.cookie("token", token);
+    console.log(req.cookies);
     res.status(200).send("Login successful");
   } catch (error) {
     res.status(500).send({ error: error.message });
+  }
+});
+
+app.get("/profile", userAuth, async (req, res) => {
+  res.status(200).json(req.user);
+});
+
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+  try {
+    const targetUserId = req.body.targetUserId;
+
+    res.status(200).send("Connection request sent");
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
