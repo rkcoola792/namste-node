@@ -16,9 +16,7 @@ app.use("/", profileRouter);
 // app.use("/", profile);
 // app.use("/", authRouter);
 
-app.get("/profile", userAuth, async (req, res) => {
-  res.status(200).json(req.user);
-});
+
 
 app.post("/sendConnectionRequest", userAuth, async (req, res) => {
   try {

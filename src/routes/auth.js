@@ -1,9 +1,10 @@
-const express = require('express');
-const checkEmailExists = require('../middleware/duplicateEmail');
-const { isStrongPassword } = require('../utils/strongPassword');
-const { createHash } = require('../utils/createHash');
+const express = require("express");
+const checkEmailExists = require("../middleware/duplicateEmail");
+const { isStrongPassword } = require("../utils/strongPassword");
+const { createHash } = require("../utils/createHash");
 const validator = require("validator");
-const User = require('../models/user');
+const User = require("../models/user");
+const profileRouter = require("./profile");
 const authRouter = express.Router();
 
 authRouter.post("/signup", checkEmailExists, async (req, res) => {
@@ -51,4 +52,14 @@ authRouter.post("/login", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
+profileRouter.post("/logout", async (req, res) => {
+  try {
+    res.clearCookie("token");
+    res.status(200).send("Logout successful");
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+
 module.exports = authRouter;
