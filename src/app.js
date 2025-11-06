@@ -8,15 +8,15 @@ const User = require("./models/user");
 const cookieParser = require("cookie-parser");
 const userAuth = require("./middleware/auth");
 const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
 app.use(cookieParser());
 app.use(express.json());
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
+app.use("/", requestRouter);
 // app.use("/", profile);
 // app.use("/", authRouter);
-
-
 
 app.post("/sendConnectionRequest", userAuth, async (req, res) => {
   try {
