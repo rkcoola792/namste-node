@@ -71,7 +71,7 @@ requestRouter.post(
       }
       connection.status = status;
       await connection.save();
-      res.status(200).status(`Connection request` + status);
+      res.status(200).status("Connection request updated", connection);
     } catch (error) {
       res.status(400).send(error.message);
     }
