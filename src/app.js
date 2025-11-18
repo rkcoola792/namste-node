@@ -8,6 +8,8 @@ const userAuth = require("./middleware/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/request");
 const userRouter = require("./routes/user");
+const cors = require("cors");
+app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
 
@@ -15,7 +17,6 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
-
 
 db().then(() => {
   console.log("Database connection established");

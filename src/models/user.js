@@ -53,6 +53,11 @@ user.methods.getJWT = async function () {
   });
   return token;
 };
+user.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
 
 user.methods.validatePassword = async function (passwordEntered) {
   const user = this;

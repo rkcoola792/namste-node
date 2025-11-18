@@ -8,7 +8,7 @@ const profileRouter = require("./profile");
 const authRouter = express.Router();
 
 authRouter.post("/signup", checkEmailExists, async (req, res) => {
-  const { name, email, password, age, gender } = req.body;
+  const { name, email, password, age, gender ,skills} = req.body;
   const strongPassword = await isStrongPassword(req.body.password);
   const hash = createHash(password);
   try {
@@ -21,9 +21,12 @@ authRouter.post("/signup", checkEmailExists, async (req, res) => {
       password: hash,
       age,
       gender,
+      skills: [],
     });
     await newUser.save();
-    res.status(201).send("User signed up");
+    res
+      .status(201)
+      .json({ message: "User registered successfully", user: newUser });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -47,7 +50,7 @@ authRouter.post("/login", async (req, res) => {
     const token = await user.getJWT();
     res.cookie("token", token);
     console.log(req.cookies);
-    res.status(200).send("Login successful");
+    res.status(200).send(user).select();
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
@@ -60,6 +63,5 @@ profileRouter.post("/logout", async (req, res) => {
     res.status(500).send({ error: error.message });
   }
 });
-
 
 module.exports = authRouter;
