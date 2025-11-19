@@ -50,7 +50,7 @@ authRouter.post("/login", async (req, res) => {
     const token = await user.getJWT();
     res.cookie("token", token);
     console.log(req.cookies);
-    res.status(200).send(user).select();
+    res.status(200).send(user)
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
